@@ -4,7 +4,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Roster | string>) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Roster | Roster[] | string>
+) {
   if (req.method === 'POST') {
     const { description } = req.body;
 
@@ -15,7 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
 
     res.status(201).json(roster);
+  } else if (req.method === 'GET') {
+    const rosters = await prisma.roster.findMany();
+
+    res.status(201).json(rosters);
   } else {
-    res.status(400).send('Specify an id in the endpoint if making a GET, PUT, or DELETE request');
+    res.status(400).send('Specify an id in the endpoint if making a PUT, or DELETE request');
   }
 }
