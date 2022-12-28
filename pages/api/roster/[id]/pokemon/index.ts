@@ -29,6 +29,13 @@ export default async function handler(
 
       res.status(201).json(rosterPokemon);
     } else if (req.method === 'GET') {
+      const rosterPokemon = await prisma.rosterPokemon.findMany({
+        where: {
+          rosterId: roster.id,
+        },
+      });
+
+      
     } else {
       res.status(400).send('Specify an id in the endpoint if making a PUT, or DELETE request');
     }
