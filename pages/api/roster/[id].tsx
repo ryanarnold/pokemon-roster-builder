@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   const roster = await prisma.roster.findUnique({
     where: {
-      id: 1,
+      id: parseInt(id as string),
     },
   });
 
