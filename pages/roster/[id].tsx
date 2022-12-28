@@ -1,24 +1,32 @@
 import Head from 'next/head';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import Roster from '../types/roster';
-import RosterItem from '../components/RosterItem';
+import React, { useEffect, useState } from 'react';
+import Roster from '../../types/roster';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Home() {
-  const [roster, setRoster] = useState<Array<Roster>>([]);
+  const [roster, setRoster] = useState<Roster>();
+  const [pokemonName, setPokemonName] = useState('');
 
-  const fetchRoster = async () => {
-    const fetchedRoster = await axios.get('/api/roster');
+  const router = useRouter();
+  const { id } = router.query;
+
+  const fetchRoster = async (id: string) => {
+    const fetchedRoster = await axios.get(`/api/roster/${id}`);
     setRoster(fetchedRoster.data);
   };
 
-  const deleteRoster = async (id: number) => {
-    setRoster(roster.filter((item) => item.id !== id));
-    await axios.delete(`/api/roster/${id}`);
+  const addPokemon = () => {};
+
+  const handlePokemonNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPokemonName(event.target.value);
   };
 
   useEffect(() => {
-    fetchRoster();
+    if (id && id.length > 0 && typeof id === 'string') {
+      fetchRoster(id);
+    }
   }, []);
 
   return (
@@ -33,7 +41,13 @@ export default function Home() {
         <div className="grid grid-cols-3">
           <div></div>
           <div className="mt-5">
-            <h1 className="text-center text-3xl font-bold">Pokemon Roster Builder</h1>
+            <p>
+              <Link href="/" className="text-blue-500 hover:underline">
+                {' '}
+                Go home
+              </Link>
+            </p>
+            <h1 className="text-center text-3xl font-bold">{roster?.description}</h1>
             <div className="mt-5 grid grid-cols-[2fr_1fr] gap-4">
               <div>
                 <input
@@ -41,15 +55,21 @@ export default function Home() {
                   name="inputRosterName"
                   id="inputRosterName"
                   className="w-full rounded-md border p-2 text-lg"
+                  placeholder="Add pokemon"
+                  value={pokemonName}
+                  onChange={handlePokemonNameChange}
                 />
               </div>
               <div>
-                <button className="h-full w-full rounded-md bg-blue-700 text-white hover:bg-blue-900 active:bg-blue-700">
+                <button
+                  className="h-full w-full rounded-md bg-red-700 text-white hover:bg-blue-900 active:bg-red-700"
+                  onClick={addPokemon}
+                >
                   Add
                 </button>
               </div>
             </div>
-            <div className="mt-5 w-full">
+            {/* <div className="mt-5 w-full">
               <h3 className="text-xl font-bold">Your rosters</h3>
               <div className="mt-3 w-full">
                 {roster ? (
@@ -60,7 +80,7 @@ export default function Home() {
                   <p>Add a roster</p>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
           <div></div>
         </div>
