@@ -1,16 +1,8 @@
 import Head from 'next/head';
-import Image from 'next/image';
-import { Inter } from '@next/font/google';
-import styles from '../styles/Home.module.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-
-const inter = Inter({ subsets: ['latin'] });
-
-interface Roster {
-  id: number;
-  description: string;
-}
+import Roster from '../types/roster';
+import RosterItem from '../components/RosterItem';
 
 export default function Home() {
   const [roster, setRoster] = useState<Array<Roster>>([]);
@@ -18,6 +10,11 @@ export default function Home() {
   const fetchRoster = async () => {
     const fetchedRoster = await axios.get('/api/roster');
     setRoster(fetchedRoster.data);
+  };
+
+  const deleteRoster = async (id: number) => {
+    setRoster(roster.filter((item) => item.id !== id));
+    await axios.delete(`/api/roster/${id}`);
   };
 
   useEffect(() => {
@@ -52,11 +49,13 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            <div className="mt-5">
+            <div className="mt-5 w-full">
               <h3 className="text-xl font-bold">Your rosters</h3>
-              <div>
+              <div className="mt-3 w-full">
                 {roster ? (
-                  roster.map((item) => <p key={item.id}>{item.description}</p>)
+                  roster.map((item) => (
+                    <RosterItem key={item.id} roster={item} handleDelete={deleteRoster} />
+                  ))
                 ) : (
                   <p>Add a roster</p>
                 )}
