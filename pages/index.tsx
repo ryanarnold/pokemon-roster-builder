@@ -2,10 +2,28 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { Inter } from '@next/font/google';
 import styles from '../styles/Home.module.css';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
+interface Roster {
+  id: number;
+  description: string;
+}
+
 export default function Home() {
+  const [roster, setRoster] = useState<Array<Roster>>([]);
+
+  const fetchRoster = async () => {
+    const fetchedRoster = await axios.get('/api/roster');
+    setRoster(fetchedRoster.data);
+  };
+
+  useEffect(() => {
+    fetchRoster();
+  }, []);
+
   return (
     <>
       <Head>
@@ -15,8 +33,37 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div>
-          <h1 className="text-3xl">Hello</h1>
+        <div className="grid grid-cols-3">
+          <div></div>
+          <div className="mt-5">
+            <h1 className="text-center text-3xl font-bold">Pokemon Roster Builder</h1>
+            <div className="mt-5 grid grid-cols-[2fr_1fr] gap-4">
+              <div>
+                <input
+                  type="text"
+                  name="inputRosterName"
+                  id="inputRosterName"
+                  className="w-full rounded-md border p-2 text-lg"
+                />
+              </div>
+              <div>
+                <button className="h-full w-full rounded-md bg-blue-700 text-white hover:bg-blue-900 active:bg-blue-700">
+                  Add
+                </button>
+              </div>
+            </div>
+            <div className="mt-5">
+              <h3 className="text-xl font-bold">Your rosters</h3>
+              <div>
+                {roster ? (
+                  roster.map((item) => <p key={item.id}>{item.description}</p>)
+                ) : (
+                  <p>Add a roster</p>
+                )}
+              </div>
+            </div>
+          </div>
+          <div></div>
         </div>
       </main>
     </>
