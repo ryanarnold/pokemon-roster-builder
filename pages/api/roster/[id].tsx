@@ -1,36 +1,48 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Roster } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 const prisma = new PrismaClient();
 
-type Roster = {
-  id: number;
-  description: string;
-};
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Roster | string>) {
-  const { id } = req.body;
+  const { id } = req.query;
 
   if (id === undefined) {
     res.status(400).send('Missing roster id');
   }
 
-  if (req.method === 'GET') {
-    const roster = await prisma.roster.findUnique({
-      where: {
-        id: 1,
-      },
-    });
+  const roster = await prisma.roster.findUnique({
+    where: {
+      id: 1,
+    },
+  });
 
-    if (roster) {
+  if (roster) {
+    if (req.method === 'GET') {
       res.status(200).json(roster);
-    } else {
-      res.status(404).send('Roster not found');
+    } else if (req.method === 'PUT') {
+      const { description } = req.body;
+
+      const updatedRoster = await prisma.roster.update({
+        where: {
+          id: roster.id,
+        },
+        data: {
+          description: description,
+        },
+      });
+
+      res.status(200).json(updatedRoster);
+    } else if (req.method === 'DELETE') {
+      await prisma.roster.delete({
+        where: {
+          id: roster.id,
+        },
+      });
+
+      res.status(200).send('Roster deleted');
     }
-  } else if (req.method === 'PUT') {
-    res.status(200).json({ id: 1, description: 'Hoenn Roster' });
-  } else if (req.method === 'DELETE') {
-    res.status(200).json({ id: 1, description: 'Hoenn Roster' });
+  } else {
+    res.status(400).send('Roster not found');
   }
 }
