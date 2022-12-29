@@ -2,6 +2,10 @@
 
 A simple web app that lets users build Pokemon teams (aka rosters).
 
+Live demo: https://pokemon-roster-builder.up.railway.app/
+
+![image](https://user-images.githubusercontent.com/18186677/209906323-de8c8a01-a611-4b2b-9abb-997ea7451e32.png)
+
 ## Stack
 
 - Next.js (TypeScript)
@@ -11,7 +15,7 @@ A simple web app that lets users build Pokemon teams (aka rosters).
 
 ## Integration with Poke API
 
-The app itself doesn't store any specifi pokemon data. It only stores 2 things:
+The app itself doesn't store any specific pokemon data. It only stores 2 things:
 
 - The user's roster
 - The Pokemon IDs under each roster
@@ -91,7 +95,7 @@ Response data structure:
 
 Note: Update via PUT wasn't implemented since it is essentially the same as invoking DELETE then POST.
 
-### Installation and Setup
+## Installation and Setup
 
 1. Clone the repository
 2. Initialize npm
@@ -107,13 +111,15 @@ npm install
 npx prisma db push
 ```
 
-5. Run the dev server and application should be accessible from http://localhost:3000/
+5. If using VS Code, simply start the debugger for the configuration "Next.js: debug full stack"
+
+6. If not, run the dev server and application should be accessible from http://localhost:3000/
 
 ```bash
 npm run dev
 ```
 
-### Future Improvements
+## Future Improvements
 
 - Add an authentication layer so different users can have different rosters
 - Add more pokemon information
