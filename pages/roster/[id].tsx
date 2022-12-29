@@ -60,6 +60,12 @@ export default function Home() {
     setPokemonName(event.target.value);
   };
 
+  const handleRemovePokemon = async (pokemon: RosterPokemon) => {
+    await axios.delete(`/api/roster/${pokemon.rosterId}/pokemon/${pokemon.pokemonId}`);
+
+    await fetchRosterPokemon();
+  };
+
   useEffect(() => {
     if (router.isReady) {
       fetchRoster(rosterId);
@@ -128,7 +134,13 @@ export default function Home() {
                 <h3 className="text-xl font-bold">Pokemon</h3>
                 <div className="mt-3 w-full">
                   {rosterPokemon ? (
-                    rosterPokemon.map((item) => <PokemonItem key={item.pokemonId} pokemon={item} />)
+                    rosterPokemon.map((item) => (
+                      <PokemonItem
+                        key={item.pokemonId}
+                        pokemon={item}
+                        handleRemove={handleRemovePokemon}
+                      />
+                    ))
                   ) : (
                     <p>Add pokemon</p>
                   )}
