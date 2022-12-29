@@ -6,6 +6,8 @@ import RosterItem from '../components/RosterItem';
 
 export default function Home() {
   const [roster, setRoster] = useState<Array<Roster>>([]);
+  const [rosterName, setRosterName] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
 
   const fetchRoster = async () => {
     const fetchedRoster = await axios.get('/api/roster');
@@ -15,6 +17,17 @@ export default function Home() {
   const deleteRoster = async (id: number) => {
     setRoster(roster.filter((item) => item.id !== id));
     await axios.delete(`/api/roster/${id}`);
+  };
+
+  const addRoster = async () => {
+    setIsAdding(true);
+    await axios.post('/api/roster', { description: rosterName });
+    await fetchRoster();
+    setIsAdding(false);
+  };
+
+  const handleRosterNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRosterName(event.target.value);
   };
 
   useEffect(() => {
@@ -45,12 +58,23 @@ export default function Home() {
                   id="inputRosterName"
                   className="w-full rounded-md border p-2 text-lg"
                   placeholder="Add a roster"
+                  value={rosterName}
+                  onChange={handleRosterNameChange}
                 />
               </div>
               <div>
-                <button className="h-full w-full rounded-md bg-blue-700 text-white hover:bg-blue-900 active:bg-blue-700">
-                  Add
-                </button>
+                {isAdding ? (
+                  <button className="h-full w-full rounded-md bg-blue-300 text-white" disabled>
+                    Adding...
+                  </button>
+                ) : (
+                  <button
+                    className="h-full w-full rounded-md bg-blue-700 text-white hover:bg-blue-900 active:bg-blue-700"
+                    onClick={addRoster}
+                  >
+                    Add
+                  </button>
+                )}
               </div>
             </div>
             <div className="mt-5 w-full">
