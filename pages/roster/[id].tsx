@@ -5,12 +5,14 @@ import Roster from '../../types/roster';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import RosterPokemon from '../../types/roster-pokemon';
+import PokemonItem from '../../components/PokemonItem';
 
 export default function Home() {
   const [roster, setRoster] = useState<Roster>();
   const [rosterPokemon, setRosterPokemon] = useState<Array<RosterPokemon>>();
   const [pokemonName, setPokemonName] = useState('');
   const [error, setError] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
 
   const router = useRouter();
   const { id } = router.query;
@@ -27,6 +29,8 @@ export default function Home() {
   };
 
   const addPokemon = async () => {
+    setIsAdding(true);
+
     const allPokemon = (await axios.get('https://pokeapi.co/api/v2/pokemon/?limit=1000')).data
       .results;
 
@@ -46,8 +50,10 @@ export default function Home() {
       };
 
       await axios.post(`/api/roster/${id}/pokemon`, data);
-      // await fetchRosterPokemon(id as string);
+      await fetchRosterPokemon();
     }
+
+    setIsAdding(false);
   };
 
   const handlePokemonNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,12 +105,22 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <button
-                    className="h-full w-full rounded-md bg-red-700 text-white hover:bg-red-900 active:bg-red-700"
-                    onClick={addPokemon}
-                  >
-                    Add
-                  </button>
+                  {isAdding ? (
+                    <button
+                      className="h-full w-full rounded-md bg-red-300 text-white"
+                      onClick={addPokemon}
+                      disabled
+                    >
+                      Adding...
+                    </button>
+                  ) : (
+                    <button
+                      className="h-full w-full rounded-md bg-red-700 text-white hover:bg-red-900 active:bg-red-700"
+                      onClick={addPokemon}
+                    >
+                      Add
+                    </button>
+                  )}
                 </div>
               </div>
               {error ? <p className="text-sm text-red-300">{error}</p> : null}
@@ -112,7 +128,7 @@ export default function Home() {
                 <h3 className="text-xl font-bold">Pokemon</h3>
                 <div className="mt-3 w-full">
                   {rosterPokemon ? (
-                    rosterPokemon.map((item) => <p key={item.pokemonId}>{item.pokemonId}</p>)
+                    rosterPokemon.map((item) => <PokemonItem key={item.pokemonId} pokemon={item} />)
                   ) : (
                     <p>Add pokemon</p>
                   )}
