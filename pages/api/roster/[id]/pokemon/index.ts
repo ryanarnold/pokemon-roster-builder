@@ -33,6 +33,8 @@ export default async function handler(
           rosterId: roster.id,
         },
       });
+
+      res.status(200).json(rosterPokemon);
     } else {
       res.status(400).send('Specify an id in the endpoint if making a PUT, or DELETE request');
     }
