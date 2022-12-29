@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Pokemon Roster Builder
 
-## Getting Started
+A simple web app that lets users build Pokemon teams (aka rosters).
 
-First, run the development server:
+## Stack
+
+- Next.js (TypeScript)
+- Prisma
+- MySQL
+- Tailwind CSS
+
+## Integration with Poke API
+
+The app itself doesn't store any specifi pokemon data. It only stores 2 things:
+
+- The user's roster
+- The Pokemon IDs under each roster
+
+The app invokes [Poke API](https://pokeapi.co/docs/v2#pokemon-section) to retrieve additional Pokemon data.
+
+- `https://pokeapi.co/api/v2/pokemon/${pokemonId}` - retrieves data for a specific pokemon. The app extracts the following properties:
+
+  - Pokemon Name
+  - Type 1
+  - Type 2
+  - Sprite URL (hosted in Poke API's file server)
+
+- `https://pokeapi.co/api/v2/pokemon/?limit=1000` - retrieves a list of all Pokemon. Used to verify if the user's input pokemon name is an existing one.
+
+## Backend API
+
+Aside from the frontend UI, the app exposes a backend API for the basic CRUD operations.
+
+### Roster
+
+Represents a roster resource.
+
+Response data structure:
+
+```ts
+{
+    "id": number,
+    "description": string
+}
+```
+
+- GET `/api/roster/{id}` - retrieves a single roster
+- GET `/api/roster/` - retrieves all rosters
+- POST `/api/roster/` - create a new roster
+
+  ```json
+  {
+    "description": "Johto Roster"
+  }
+  ```
+
+- PUT `/api/roster/{id}` - update an existing roster
+
+  ```json
+  {
+    "description": "Sinnoh Roster"
+  }
+  ```
+
+- DELETE `/api/roster/{id}` - delete an existing roster
+
+### Roster Pokemon
+
+Represents a pokemon resource under a roser.
+
+Response data structure:
+
+```ts
+{
+    "rosterId": number,
+    "pokemonId": number // must be a valid pokemon id in the Poke API database
+}
+```
+
+- GET `/api/roster/{id}/pokemon/{pokemonId}/` - retrieves a single pokemon from a roster
+- GET `/api/roster/{id}/pokemon/` - retrieves all pokemon of a roster
+- POST `/api/roster/{id}/pokemon/` - adds a new pokemon for a roster
+
+  ```json
+  {
+    "pokemonId": 1 // must be a valid pokemon id in the Poke API database
+  }
+  ```
+
+- DELETE `/api/roster/{id}/pokemon/{pokemonId}` - delete a pokemon from a roster
+
+Note: Update via PUT wasn't implemented since it is essentially the same as invoking DELETE then POST.
+
+### Installation and Setup
+
+1. Clone the repository
+2. Initialize npm
+
+```bash
+npm install
+```
+
+3. Create .env with a single variable `DATABASE_URL` and set the MySQL database connection string
+4. If connecting to a new database, migrate the prisma schema
+
+```bash
+npx prisma db push
+```
+
+5. Run the dev server and application should be accessible from http://localhost:3000/
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Future Improvements
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Add an authentication layer so different users can have different rosters
+- Add more pokemon information
+- Refactor UI into components
+- Refactor Tailwind classes
