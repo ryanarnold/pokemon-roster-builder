@@ -34,6 +34,9 @@ export default function Home() {
           <div></div>
           <div className="mt-5">
             <h1 className="text-center text-3xl font-bold">Pokemon Roster Builder</h1>
+            <p className="mt-3 mb-5 text-center text-sm text-slate-500">
+              Build your own Pokemon team
+            </p>
             <div className="mt-5 grid grid-cols-[2fr_1fr] gap-4">
               <div>
                 <input
@@ -41,6 +44,7 @@ export default function Home() {
                   name="inputRosterName"
                   id="inputRosterName"
                   className="w-full rounded-md border p-2 text-lg"
+                  placeholder="Add a roster"
                 />
               </div>
               <div>
