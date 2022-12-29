@@ -47,6 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             })
           ).data;
 
+          pokemonObj.name = pokeApiPokemon.name;
           pokemonObj.spriteUrl = pokeApiPokemon.sprites.front_default;
           pokemonObj.type1 = pokeApiPokemon.types[0].type.name;
 
