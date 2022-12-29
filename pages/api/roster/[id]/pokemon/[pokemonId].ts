@@ -1,12 +1,10 @@
 import { PrismaClient, RosterPokemon } from '@prisma/client';
+import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 const prisma = new PrismaClient();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<RosterPokemon | string>
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { id, pokemonId } = req.query;
 
   if (id === undefined) {
@@ -33,7 +31,25 @@ export default async function handler(
 
     if (rosterPokemon) {
       if (req.method === 'GET') {
-        res.status(200).json(rosterPokemon);
+        const response: any = {
+          rosterId: rosterPokemon.rosterId,
+          pokemonId: rosterPokemon.pokemonId,
+        };
+
+        const pokeApiPokemon = (
+          await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`, {
+            headers: { 'Accept-Encoding': 'gzip,deflate,compress' },
+          })
+        ).data;
+
+        response.spriteUrl = pokeApiPokemon.sprites.front_default;
+        response.type1 = pokeApiPokemon.types[0].type.name;
+
+        if (pokeApiPokemon.types.length > 1) {
+          response.type2 = pokeApiPokemon.types[1].type.name;
+        }
+
+        res.status(200).json(response);
       } else if (req.method === 'DELETE') {
         await prisma.rosterPokemon.delete({
           where: {
