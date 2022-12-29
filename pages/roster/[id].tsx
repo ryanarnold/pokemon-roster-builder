@@ -4,30 +4,67 @@ import React, { useEffect, useState } from 'react';
 import Roster from '../../types/roster';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import RosterPokemon from '../../types/roster-pokemon';
 
 export default function Home() {
   const [roster, setRoster] = useState<Roster>();
+  const [rosterPokemon, setRosterPokemon] = useState<Array<RosterPokemon>>();
   const [pokemonName, setPokemonName] = useState('');
+  const [error, setError] = useState('');
 
   const router = useRouter();
   const { id } = router.query;
+  const rosterId = id as string;
 
   const fetchRoster = async (id: string) => {
     const fetchedRoster = await axios.get(`/api/roster/${id}`);
     setRoster(fetchedRoster.data);
   };
 
-  const addPokemon = () => {};
+  const fetchRosterPokemon = async () => {
+    const fetchedRosterPokemon = await axios.get(`/api/roster/${roster?.id}/pokemon`);
+    setRosterPokemon(fetchedRosterPokemon.data);
+  };
+
+  const addPokemon = async () => {
+    const allPokemon = (await axios.get('https://pokeapi.co/api/v2/pokemon/?limit=1000')).data
+      .results;
+
+    const enteredPokemon = allPokemon.filter(
+      (pokemon: any) => pokemon.name.toUpperCase() === pokemonName.toUpperCase()
+    );
+
+    if (enteredPokemon.length === 0) {
+      setError('Pokemon name not found (try: something like bulbasaur or pikachu)');
+    } else {
+      setError('');
+
+      const pokemon = (await axios.get(enteredPokemon[0].url)).data;
+
+      const data = {
+        pokemonId: pokemon.id,
+      };
+
+      await axios.post(`/api/roster/${id}/pokemon`, data);
+      // await fetchRosterPokemon(id as string);
+    }
+  };
 
   const handlePokemonNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPokemonName(event.target.value);
   };
 
   useEffect(() => {
-    if (id && id.length > 0 && typeof id === 'string') {
-      fetchRoster(id);
+    if (router.isReady) {
+      fetchRoster(rosterId);
     }
-  }, []);
+  }, [rosterId, router.isReady]);
+
+  useEffect(() => {
+    if (roster) {
+      fetchRosterPokemon();
+    }
+  }, [roster]);
 
   return (
     <>
@@ -38,52 +75,53 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className="grid grid-cols-3">
-          <div></div>
-          <div className="mt-5">
-            <p>
-              <Link href="/" className="text-blue-500 hover:underline">
-                {' '}
-                Go home
-              </Link>
-            </p>
-            <h1 className="text-center text-3xl font-bold">{roster?.description}</h1>
-            <div className="mt-5 grid grid-cols-[2fr_1fr] gap-4">
-              <div>
-                <input
-                  type="text"
-                  name="inputRosterName"
-                  id="inputRosterName"
-                  className="w-full rounded-md border p-2 text-lg"
-                  placeholder="Add pokemon"
-                  value={pokemonName}
-                  onChange={handlePokemonNameChange}
-                />
+        {roster ? (
+          <div className="grid grid-cols-3">
+            <div></div>
+            <div className="mt-5">
+              <p>
+                <Link href="/" className="text-blue-500 hover:underline">
+                  {' '}
+                  Go home
+                </Link>
+              </p>
+              <h1 className="text-center text-3xl font-bold">{roster?.description}</h1>
+              <div className="mt-5 grid grid-cols-[2fr_1fr] gap-4">
+                <div>
+                  <input
+                    type="text"
+                    name="inputRosterName"
+                    id="inputRosterName"
+                    className="w-full rounded-md border p-2 text-lg"
+                    placeholder="Add pokemon"
+                    value={pokemonName}
+                    onChange={handlePokemonNameChange}
+                  />
+                </div>
+                <div>
+                  <button
+                    className="h-full w-full rounded-md bg-red-700 text-white hover:bg-red-900 active:bg-red-700"
+                    onClick={addPokemon}
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
-              <div>
-                <button
-                  className="h-full w-full rounded-md bg-red-700 text-white hover:bg-blue-900 active:bg-red-700"
-                  onClick={addPokemon}
-                >
-                  Add
-                </button>
+              {error ? <p className="text-sm text-red-300">{error}</p> : null}
+              <div className="mt-5 w-full">
+                <h3 className="text-xl font-bold">Pokemon</h3>
+                <div className="mt-3 w-full">
+                  {rosterPokemon ? (
+                    rosterPokemon.map((item) => <p key={item.pokemonId}>{item.pokemonId}</p>)
+                  ) : (
+                    <p>Add pokemon</p>
+                  )}
+                </div>
               </div>
             </div>
-            {/* <div className="mt-5 w-full">
-              <h3 className="text-xl font-bold">Your rosters</h3>
-              <div className="mt-3 w-full">
-                {roster ? (
-                  roster.map((item) => (
-                    <RosterItem key={item.id} roster={item} handleDelete={deleteRoster} />
-                  ))
-                ) : (
-                  <p>Add a roster</p>
-                )}
-              </div>
-            </div> */}
+            <div></div>
           </div>
-          <div></div>
-        </div>
+        ) : null}
       </main>
     </>
   );
